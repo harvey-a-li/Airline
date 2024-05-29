@@ -46,7 +46,8 @@ function NavBar() {
         return (
           <nav>
             <Link to="/userHome">Homepage</Link> | 
-            <Link to="/flights">View Flights</Link> |
+            <Link to="/userViewFlights">View Flights</Link> |
+            <Link to="/bookFlights">Book Flights</Link> |
             <Link to="/tickets">My Booked Tickets</Link>
           </nav>
         );
@@ -108,6 +109,51 @@ function NavBar() {
             <Link to="/add">Add Flights</Link> |
             <Link to="/modify">Modify Flights</Link> |
             <Link to="/delete">Delete Flights</Link>
+          </nav>
+        );
+      }
+
+      else if (location.pathname === '/delete') {
+        return (
+          <nav style={{ marginBottom: '20px' }}>
+            <Link to="/adminHome">Homepage</Link> |
+            <Link to="/adminView">View Flights</Link> |
+            <Link to="/add">Add Flights</Link> |
+            <Link to="/modify">Modify Flights</Link> |
+            <Link to="/delete" className="active">Delete Flights</Link>
+          </nav>
+        );
+      }
+
+      else if (location.pathname === '/userViewFlights') {
+        return (
+          <nav>
+            <Link to="/userHome">Homepage</Link> | 
+            <Link to="/userViewFlights" className="active">View Flights</Link> |
+            <Link to="/bookFlights">Book Flights</Link> |
+            <Link to="/tickets">My Booked Tickets</Link>
+          </nav>
+        );
+      }
+
+      else if (location.pathname.startsWith('/bookFlights')) {
+        return (
+          <nav style={{ marginBottom: '20px' }}>
+            <Link to="/userHome">Homepage</Link> | 
+            <Link to="/userViewFlights">View Flights</Link> |
+            <Link to="/bookFlights" className="active">Book Flights</Link> |
+            <Link to="/tickets">My Booked Tickets</Link>
+          </nav>
+        );
+      }
+
+      else if (location.pathname === '/tickets') {
+        return (
+          <nav style={{ marginBottom: '20px' }}>
+            <Link to="/userHome">Homepage</Link> | 
+            <Link to="/userViewFlights">View Flights</Link> |
+            <Link to="/bookFlights">Book Flights</Link> |
+            <Link to="/tickets" className="active">My Booked Tickets</Link>
           </nav>
         );
       }

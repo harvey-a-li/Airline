@@ -28,12 +28,22 @@ function AddFlightsPage() {
             const data = await response.json();
             if (response.ok) {
                 alert(data.message);
+                setFlightNumber('');
+                setDeparture('');
+                setArrival('');
+                setMonth('');
+                setDay('');
+                setYear('');
+                setDepartureTime('');
+                setArrivalTime('');
+                setPrice('');
+                setSeats('');
             } else {
                 alert(data.message);
             }
         } catch (error) {
             console.error(error);
-            alert('An error occurred during login.');
+            alert('An error occurred during adding flights.');
         }
     };
 

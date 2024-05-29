@@ -1,7 +1,5 @@
-import React, { useState, useEffect} from "react";
-import { BrowserRouter as Router, Route, Routes, Link, useNavigate, useLocation, Navigate} from 'react-router-dom';
-import TextField from '@mui/material/TextField';
-import Button from '@mui/material/Button';
+import React, { useState, useEffect } from "react";
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 
 import NavBar from './Components/NavBar';
 
@@ -11,18 +9,23 @@ import SignUpPage from './Components/Pages/SignUpPage';
 import FlightsPage from './Components/Pages/FlightsPage';
 
 import UserHomePage from './Components/User/UserHomePage';
+import UserViewFlights from './Components/User/UserViewFlights';
+import UserBookFlights from './Components/User/UserBookFlights';
+import BookFlight from './Components/User/BookFlight';
+import PassengerDetails from './Components/User/PassengerDetails';
+import UserBookedTickets from './Components/User/UserBookedTickets'
 
 import AdminHomePage from './Components/Admin/AdminHomePage';
 import AddFlightsPage from './Components/Admin/AddFlightsPage';
 import AdminViewFlights from './Components/Admin/AdminViewFlights';
 import ModifyFlightsPage from './Components/Admin/ModifyFlightsPage';
 import ModifyFlight from './Components/Admin/ModifyFlight';
+import DeleteFlightsPage from './Components/Admin/DeleteFlightsPage';
 
 function App() {
   const [username, setUsername] = useState('guest');
 
   useEffect(() => {
-    // Check local storage for user info
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       setUsername(storedUser);
@@ -36,7 +39,7 @@ function App() {
 
   const logout = () => {
     localStorage.removeItem('user');
-    setUsername('guest'); // Update the username state to 'guest'
+    setUsername('guest');
   };
 
   return (
@@ -53,15 +56,16 @@ function App() {
           <Route path="/flights" element={<FlightsPage />} />
           <Route path="/userHome" element={<UserHomePage logout={logout} />} />
           <Route path="/adminHome" element={<AdminHomePage logout={logout} />} />
-          <Route path= "/add" element = {<AddFlightsPage />} />
-          <Route path= "/adminView" element = {<AdminViewFlights />} />
-          <Route path= "/modify" element = {<ModifyFlightsPage />} />
-          <Route path= "/modifyFlight" element = {<ModifyFlight />} />
-          {/* <Route path="/tickets" element={<TicketsPage />} />
           <Route path="/add" element={<AddFlightsPage />} />
+          <Route path="/adminView" element={<AdminViewFlights />} />
           <Route path="/modify" element={<ModifyFlightsPage />} />
-          <Route path="/delete" element={<DeleteFlightsPage />} /> */}
-          {/* Add more routes as needed */}
+          <Route path="/modifyFlight/:flightNumber" element={<ModifyFlight />} />
+          <Route path="/delete" element={<DeleteFlightsPage />} />
+          <Route path="/userViewFlights" element={<UserViewFlights />} />
+          <Route path="/bookFlights" element={<UserBookFlights />} />
+          <Route path="/bookFlights/:flightNumber" element={<BookFlight />} />
+          <Route path="/bookFlights/:flightNumber/:numTickets" element={<PassengerDetails />} />
+          <Route path="/tickets" element={<UserBookedTickets />} /> 
         </Routes>
       </div>
     </Router>

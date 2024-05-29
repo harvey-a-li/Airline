@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTable, useSortBy } from 'react-table';
-import './table.css'; // Ensure this file is created with appropriate styles
-import airports from './airportData.js';
+import '../Admin/table.css'; // Ensure this file is created with appropriate styles
+import airports from '../Pages/airportData.js';
 
 function ViewFlights() {
     const [flights, setFlights] = useState([]);

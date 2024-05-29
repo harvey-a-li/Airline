@@ -104,7 +104,11 @@ function AirportDropdown({ label, value, onChange, ...props }) {
       inputValue={inputValue}
       onInputChange={handleInputChange}
       options={airports}
-      getOptionLabel={(option) => option.name + " " + "(" + option.code+ ")"}
+      getOptionLabel={(option) => {
+        const label = option.name + " " + "(" + option.code + ")";
+        console.log("Label:", label);
+        return label;
+      }}
       renderInput={(params) => 
       <TextField 
         {...params} 
@@ -113,6 +117,7 @@ function AirportDropdown({ label, value, onChange, ...props }) {
         style={{ width: '500px' }}
         {...props}  
         />}
+        isOptionEqualToValue={(option, value) => option.code === value.code} 
     />//218
   );
 }

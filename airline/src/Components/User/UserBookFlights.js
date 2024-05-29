@@ -1,26 +1,29 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useTable, useSortBy } from 'react-table';
-import './table.css';
+import '../Admin/table.css';
 
-function ModifyFlightsPage() {
+function UserBookFlights() {
     const [flights, setFlights] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch('http://127.0.0.1:5000/modify', {
+                const response = await fetch('http://127.0.0.1:5000/bookFlights', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' }
                 });
-                if (response.ok) {
+
+                if (response.ok){
                     const data = await response.json();
                     setFlights(data);
-                } else {
+                }
+                else {
                     console.error('Flights not found');
                 }
-            } catch (error) {
+            }
+            catch (error) {
                 console.error(error);
             }
         };
@@ -57,14 +60,11 @@ function ModifyFlightsPage() {
             { Header: 'Destination', accessor: 'arrival' },
             { Header: 'Departure Time', accessor: 'departureTime' },
             { Header: 'Arrival Time', accessor: 'arrivalTime' },
-            { Header: 'Price', accessor: 'price' },
-            { Header: 'Total Seats', accessor: 'seats' },
-            { Header: 'Booked Seats', accessor: 'bookedSeats'},
-            {
-                Header: 'Actions',
-                Cell: ({ row }) => (
-                    <Link to={`/modifyFlight/${row.original.flightNumber}`}>
-                        <button>Modify</button>
+            { Header: 'Price', accessor: 'price', Cell: ({value}) => `$${value}` },
+            { Header: 'Actions', 
+                Cell: ({row}) => ( 
+                    <Link to={`/bookFlights/${row.original.flightNumber}`}>
+                        <button>Book</button>
                     </Link>
                 )
             }
@@ -72,31 +72,17 @@ function ModifyFlightsPage() {
         []
     );
 
-    const filteredFlights = useMemo(() => {
-        return flights.filter(flight =>
-            flight.flightNumber.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-    }, [searchQuery, flights]);
-
-    const tableInstance = useTable({ columns, data: filteredFlights }, useSortBy);
-
     const {
         getTableProps,
         getTableBodyProps,
         headerGroups,
         rows,
-        prepareRow,
-    } = tableInstance;
+        prepareRow
+    } = useTable({ columns, data: flights }, useSortBy);
 
     return (
-        <div className="modify-flights-page">
-            <h1>Modify Flights</h1>
-            <input
-                type="text"
-                placeholder="Search by Flight Number"
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-            />
+        <div>
+            <input type="text" placeholder="Search" onChange={e => setSearchQuery(e.target.value)} />
             <table {...getTableProps()}>
                 <thead>
                     {headerGroups.map(headerGroup => (
@@ -105,11 +91,7 @@ function ModifyFlightsPage() {
                                 <th {...column.getHeaderProps(column.getSortByToggleProps())}>
                                     {column.render('Header')}
                                     <span>
-                                        {column.isSorted
-                                            ? column.isSortedDesc
-                                                ? ' 🔽'
-                                                : ' 🔼'
-                                            : ''}
+                                        {column.isSorted ? (column.isSortedDesc ? ' 🔽' : ' 🔼') : ''}
                                     </span>
                                 </th>
                             ))}
@@ -121,9 +103,11 @@ function ModifyFlightsPage() {
                         prepareRow(row);
                         return (
                             <tr {...row.getRowProps()}>
-                                {row.cells.map(cell => (
-                                    <td {...cell.getCellProps()}>{cell.render('Cell')}</td>
-                                ))}
+                                {row.cells.map(cell => {
+                                    return (
+                                        <td {...cell.getCellProps()}>{cell.render('Cell')}</td>
+                                    );
+                                })}
                             </tr>
                         );
                     })}
@@ -133,4 +117,6 @@ function ModifyFlightsPage() {
     );
 }
 
-export default ModifyFlightsPage;
+export default UserBookFlights;
+
+

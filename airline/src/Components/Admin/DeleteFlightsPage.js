@@ -1,17 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useTable, useSortBy } from 'react-table';
-import './table.css'; // Ensure this file is created with appropriate styles
-import airports from './airportData.js';
+import './table.css';
 
-function ViewFlights() {
+function DeleteFlightsPage() {
     const [flights, setFlights] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch('http://127.0.0.1:5000/view', {
+                const response = await fetch('http://127.0.0.1:5000/delete', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' }
                 });
@@ -20,13 +18,9 @@ function ViewFlights() {
                     setFlights(data);
                 } else {
                     console.error('Flights not found');
-                    setError('Flights not found');
                 }
             } catch (error) {
                 console.error(error);
-                setError('An error occurred while fetching flights');
-            } finally {
-                setLoading(false);
             }
         };
 
@@ -54,35 +48,57 @@ function ViewFlights() {
         return `${monthStr}/${dayStr}/${year}`;
     };
 
-    const formatTime = (time) => {
-        const timeStr = time.toString().padStart(4, '0');
-        const hours = timeStr.slice(0, 2);
-        const minutes = timeStr.slice(2);
-        const period = hours >= 12 ? 'PM' : 'AM';
-        const formattedHours = hours % 12 || 12;
-        return `${formattedHours}${minutes} ${period}`;
+    const handleDelete = async (flightNumber) => {
+        const confirmed = window.confirm("Are you sure you want to delete this flight?");
+        if (confirmed) {
+            try {
+                const response = await fetch(`http://127.0.0.1:5000/deleteFlight/${flightNumber}`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (response.ok) {
+                    setFlights(flights.filter(flight => flight.flightNumber !== flightNumber));
+                    alert('Flight deleted successfully');
+                } else {
+                    console.error('Failed to delete flight');
+                    alert('Failed to delete flight');
+                }
+            } catch (error) {
+                console.error(error);
+                alert('An error occurred while deleting the flight');
+            }
+        }
     };
 
-    const columns = React.useMemo(
+    const columns = useMemo(
         () => [
-            { Header: 'Date', accessor: row => formatDate(row.month, row.day, row.year) }, // Combining month, day, year
-            { Header: 'Origin', 
-              accessor: row => {
-                const airport = airports.find(airport => airport.code === row.departure);
-                return airport ? `${airport.name} (${airport.code})` : row.departure;
-            } },
-            { Header: 'Destination', 
-            accessor: row => {const airport = airports.find(airport => airport.code === row.arrival);
-                return airport ? `${airport.name} (${airport.code})` : row.arrival;
-            }},
-            { Header: 'Departure Time', accessor: row => formatTime(row.departureTime) },
-            { Header: 'Arrival Time', accessor: row => formatTime(row.arrivalTime)},
+            { Header: 'Flight Number', accessor: 'flightNumber' },
+            { Header: 'Date', accessor: row => formatDate(row.month, row.day, row.year) },
+            { Header: 'Origin', accessor: 'departure' },
+            { Header: 'Destination', accessor: 'arrival' },
+            { Header: 'Departure Time', accessor: 'departureTime' },
+            { Header: 'Arrival Time', accessor: 'arrivalTime' },
             { Header: 'Price', accessor: 'price' },
+            { Header: 'Total Seats', accessor: 'seats' },
+            { Header: 'Booked Seats', accessor: 'bookedSeats' },
+            {
+                Header: 'Actions',
+                Cell: ({ row }) => (
+                    <button onClick={() => handleDelete(row.original.flightNumber)}>Delete</button>
+                )
+            }
         ],
-        []
+        [flights]
     );
 
-    const tableInstance = useTable({ columns, data: flights }, useSortBy);
+    const filteredFlights = useMemo(() => {
+        return flights.filter(flight =>
+            flight.flightNumber.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+    }, [searchQuery, flights]);
+
+    const tableInstance = useTable({ columns, data: filteredFlights }, useSortBy);
 
     const {
         getTableProps,
@@ -92,17 +108,15 @@ function ViewFlights() {
         prepareRow,
     } = tableInstance;
 
-    if (loading) {
-        return <p>Loading...</p>;
-    }
-
-    if (error) {
-        return <p>{error}</p>;
-    }
-
     return (
-        <div className="table-container">
-            <h1>Flights</h1>
+        <div className="delete-flights-page">
+            <h1>Delete Flights</h1>
+            <input
+                type="text"
+                placeholder="Search by Flight Number"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+            />
             <table {...getTableProps()}>
                 <thead>
                     {headerGroups.map(headerGroup => (
@@ -139,4 +153,4 @@ function ViewFlights() {
     );
 }
 
-export default ViewFlights;
+export default DeleteFlightsPage;

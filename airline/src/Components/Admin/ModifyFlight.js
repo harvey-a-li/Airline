@@ -1,142 +1,185 @@
-import React, {useState} from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
-
-import AirportDropdown from './AirportDropdown'; 
+import AirportDropdown from './AirportDropdown';
+import airports from '../Pages/airportData.js';
 
 function ModifyFlight() {
-    const [flightNumber, setFlightNumber] = useState('');
-    const [departure, setDeparture] = useState('');
-    const [arrival, setArrival] = useState('');
-    const [month, setMonth] = useState('');
-    const [day, setDay] = useState('');
-    const [year, setYear] = useState('');
-    const [departureTime, setDepartureTime] = useState('');
-    const [arrivalTime, setArrivalTime] = useState('');
-    const [price, setPrice] = useState('');
-    const [seats, setSeats] = useState('');
+    const { flightNumber } = useParams();
+    const navigate = useNavigate();
 
+    const [flightData, setFlightData] = useState({
+        departure: null,
+        arrival: null,
+        month: '',
+        day: '',
+        year: '',
+        departureTime: '',
+        arrivalTime: '',
+        price: '',
+        seats: ''
+    });
 
-    const handleModifyFlight = async (e) => {
+    const getAirportObjectWithCode = (code) => {
+        return airports.find(airport => airport.code === code) || { code, name: code };
+    };
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await fetch(`http://127.0.0.1:5000/modify/${flightNumber}`, {
+                    method: 'GET'
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    setFlightData({
+                        departure: getAirportObjectWithCode(data.departure),
+                        arrival: getAirportObjectWithCode(data.arrival),
+                        month: data.month,
+                        day: data.day,
+                        year: data.year,
+                        departureTime: data.departureTime,
+                        arrivalTime: data.arrivalTime,
+                        price: data.price,
+                        seats: data.seats
+                    });
+                } else {
+                    console.error("Error fetching flight data");
+                }
+            } catch (error) {
+                console.error('Error modifying flight:', error);
+                alert('An error occurred while modifying the flight.');
+            }
+        };
+        fetchData();
+    }, [flightNumber]);
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFlightData((prevData) => ({ ...prevData, [name]: value }));
+    };
+
+    const handleUpdateFlight = async (e) => {
         e.preventDefault();
         try {
-            const response = await fetch('http://127.0.0.1:5000/modify/${flightNumber}', {
+            const response = await fetch(`http://127.0.0.1:5000/modify/${flightNumber}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ flight_id: flightNumber, new_data:{ flightNumber, departure, arrival, month, day, year, departureTime, arrivalTime, price, seats }})
+                body: JSON.stringify(flightData)
             });
-
-            const data = await response.json();
             if (response.ok) {
-                alert(data.message);
+                alert('Flight updated successfully!');
+                navigate('/modify');
             } else {
-                alert(data.message);
+                console.error("Error updating flight data");
+                alert('Error updating flight data');
             }
         } catch (error) {
-            console.error(error);
-            alert('An error occurred during login.');
+            console.error('Error updating flight data:', error);
+            alert('An error occurred while updating the flight data.');
         }
     };
 
     return (
         <div style={{ marginTop: '20px', padding: '20px' }}>
-            <form onSubmit={handleModifyFlight}>
+            <form onSubmit={handleUpdateFlight}>
                 <TextField
                     label="Flight Number"
                     variant="filled"
                     value={flightNumber}
-                    onChange={(e) => setFlightNumber(e.target.value)}
+                    disabled
                     size="small"
                     style={{ marginBottom: '10px' }}
                 />
                 <div style={{ display: 'flex', marginBottom: '10px' }}>
                     <AirportDropdown
                         label="Departure City"
-                        value={departure}
-                        onChange={(value) => setDeparture(value)}
+                        value={flightData.departure}
+                        onChange={(value) => setFlightData(prev => ({ ...prev, departure: value }))}
                         size="small"
-                        sx={{ marginRight: '10px', width: '100%'}}
+                        sx={{ marginRight: '10px', width: '100%' }}
                     />
-                    
                     <AirportDropdown
                         label="Arrival City"
-                        value={arrival}
-                        onChange={(value) => setArrival(value)}
+                        value={flightData.arrival}
+                        onChange={(value) => setFlightData(prev => ({ ...prev, arrival: value }))}
                         size="small"
                         sx={{ marginRight: '10px', width: '100%' }}
                     />
                 </div>
-
                 <div style={{ display: 'flex', marginBottom: '10px' }}>
                     <TextField
                         label="Month"
                         variant="filled"
-                        value={month}
-                        onChange={(e) => setMonth(e.target.value)}
+                        name="month"
+                        value={flightData.month}
+                        onChange={handleChange}
                         size="small"
                         style={{ marginRight: '10px' }}
                     />
                     <TextField
                         label="Day"
                         variant="filled"
-                        value={day}
-                        onChange={(e) => setDay(e.target.value)}
+                        name="day"
+                        value={flightData.day}
+                        onChange={handleChange}
                         size="small"
                         style={{ marginRight: '10px' }}
                     />
                     <TextField
                         label="Year"
                         variant="filled"
-                        value={year}
-                        onChange={(e) => setYear(e.target.value)}
+                        name="year"
+                        value={flightData.year}
+                        onChange={handleChange}
                         size="small"
                     />
                 </div>
-
                 <div style={{ display: 'flex', marginBottom: '10px' }}>
                     <TextField
                         label="Departure Time"
                         variant="filled"
-                        value={departureTime}
-                        onChange={(e) => setDepartureTime(e.target.value)}
+                        name="departureTime"
+                        value={flightData.departureTime}
+                        onChange={handleChange}
                         size="small"
                         style={{ marginRight: '10px' }}
                     />
-
                     <TextField
                         label="Arrival Time"
                         variant="filled"
-                        value={arrivalTime}
-                        onChange={(e) => setArrivalTime(e.target.value)}
+                        name="arrivalTime"
+                        value={flightData.arrivalTime}
+                        onChange={handleChange}
                         size="small"
-                    />    
-                </div>
-
-                <div style={{marginBottom: '10px' }}>
-                    <TextField
-                        label = "Price"
-                        variant = "filled"
-                        value = {price}
-                        onChange = {(e) => setPrice(e.target.value)}
-                        size = "small"
                     />
                 </div>
-
-                <div style={{marginBottom: '10px' }}>
+                <div style={{ marginBottom: '10px' }}>
                     <TextField
-                        label = "Seats"
-                        variant = "filled"
-                        value = {seats}
-                        onChange = {(e) => setSeats(e.target.value)}
-                        size = "small"
+                        label="Price"
+                        variant="filled"
+                        name="price"
+                        value={flightData.price}
+                        onChange={handleChange}
+                        size="small"
                     />
                 </div>
-                <Button type="submit" variant="contained">Modify Flight</Button>
+                <div style={{ marginBottom: '10px' }}>
+                    <TextField
+                        label="Seats"
+                        variant="filled"
+                        name="seats"
+                        value={flightData.seats}
+                        onChange={handleChange}
+                        size="small"
+                    />
+                </div>
+                <Button type="submit" variant="contained">Update</Button>
             </form>
         </div>
     );
 }
 
 export default ModifyFlight;
-        
-

@@ -16,13 +16,20 @@ function AdminViewFlights() {
                 });
                 if (response.ok) {
                     const data = await response.json();
-                    setFlights(data);
+                    console.log("Raw data:", data); // Log the raw data received from the API
+                    // Preprocess flights data
+                    const formattedData = data.map(flight => ({
+                        ...flight,
+                        formattedDate: formatDate(flight.month, flight.day, flight.year)
+                    }));
+                    console.log("Formatted data:", formattedData); // Log the formatted data
+                    setFlights(formattedData);
                 } else {
                     console.error('Flights not found');
                     setError('Flights not found');
                 }
             } catch (error) {
-                console.error(error);
+                console.error('Error fetching data:', error);
                 setError('An error occurred while fetching flights');
             } finally {
                 setLoading(false);
@@ -47,7 +54,7 @@ function AdminViewFlights() {
             'November': '11',
             'December': '12'
         };
-
+    
         const monthStr = monthMapping[month] || month.toString().padStart(2, '0');
         const dayStr = day.toString().padStart(2, '0');
         return `${monthStr}/${dayStr}/${year}`;
@@ -56,13 +63,14 @@ function AdminViewFlights() {
     const columns = React.useMemo(
         () => [
             { Header: 'Flight Number', accessor: 'flightNumber' },
-            { Header: 'Date', accessor: row => formatDate(row.month, row.day, row.year) }, // Combining month, day, year
+            { Header: 'Date', accessor: 'formattedDate' }, // Use formattedDate here
             { Header: 'Origin', accessor: 'departure' },
             { Header: 'Destination', accessor: 'arrival' },
             { Header: 'Departure Time', accessor: 'departureTime' },
             { Header: 'Arrival Time', accessor: 'arrivalTime' },
             { Header: 'Price', accessor: 'price' },
-            { Header: 'Seats Left', accessor: 'seats' },
+            { Header: 'Total Seats', accessor: 'seats' },
+            { Header: 'Booked Seats', accessor: 'bookedSeats'}
         ],
         []
     );

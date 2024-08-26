@@ -2,9 +2,9 @@ Solo Project by Harvey Li
 
 Here's the full instruction set in README markup format:
 
-# Project Title
+# Airline Application
 
-A brief description of what this project does and who it's for.
+This is a airline booking systems for travelers looking for an easy way to see all the flights they could potentially book.
 
 ## Getting Started
 
